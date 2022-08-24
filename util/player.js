@@ -12,13 +12,13 @@ const {
 
 const config = require('../config')
 
-var lastSongs = []
+var queue = []
 var channel
 var directory = config.defaultDir
 
 const player = createAudioPlayer()
 var resource
-var volume = 0.25
+var volume = config.defaultVolume
 
 player.on('stateChange', (oldState, newState) => {
     if (oldState.status != AudioPlayerStatus && newState.status == AudioPlayerStatus.Idle) {
@@ -41,53 +41,48 @@ function setChannel(newChannel) {
 
 function setDirectory(dir) {
     directory = dir
-    lastSongs = []
+    queue = []
 }
 
 async function play() {
 
-    fs.readdir('./music/' + directory, (err, files) => {
+    if (!queue[0]) {
+        let files = fs.readdirSync('./music/' + directory)
 
-        files = shuffle(files)
-
-        let file = files[0]
-        let path = `./music/${directory}/${file}`
-
-        let i = 1
-        while (lastSongs.indexOf(path) > -1 || !path.endsWith('.mp3')) {
-            file = files[i]
-            path = `./music/${directory}/${file}`
-            i += 1
+        for (let file of files) {
+            if (file.endsWith('.mp3')) {
+                queue.push({
+                    path: `./music/${directory}/${file}`,
+                    title: file.split('.mp3')[0]
+                })
+            }
         }
 
-        let title = file.split('.mp3')[0]
+        queue = shuffle(queue)
 
-        lastSongs.push(path)
+    }
 
-        while (lastSongs.length > files.length * config.cache) {
-            lastSongs.shift()
-        }
+    song = queue[0]
+    queue.shift()
 
-        console.log(`Playing ${title}`)
+    console.log(`Playing ${song.title}`)
 
-        process.client.user.setPresence({
-            status: 'online',
-            activities: [{
-                name: title,
-                type: 'PLAYING'
-            }]
-        })
-
-        resource = createAudioResource(path, {
-            inputType: StreamType.Arbitrary,
-            inlineVolume: true
-        })
-
-        resource.volume.setVolume(volume)
-
-        player.play(resource)
-
+    process.client.user.setPresence({
+        status: 'online',
+        activities: [{
+            name: song.title,
+            type: 'PLAYING'
+        }]
     })
+
+    resource = createAudioResource(song.path, {
+        inputType: StreamType.Arbitrary,
+        inlineVolume: true
+    })
+
+    resource.volume.setVolume(volume)
+
+    player.play(resource)
 
 }
 
@@ -154,7 +149,6 @@ function setVolume(newVolume) {
     volume = newVolume
     resource.volume.setVolume(newVolume)
 }
-
 
 module.exports = {
     setChannel,
