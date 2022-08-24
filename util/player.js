@@ -18,7 +18,7 @@ var directory = config.defaultDir
 
 const player = createAudioPlayer()
 var resource
-var volume = 0.25
+var volume = config.defaultVolume
 
 player.on('stateChange', (oldState, newState) => {
     if (oldState.status != AudioPlayerStatus && newState.status == AudioPlayerStatus.Idle) {

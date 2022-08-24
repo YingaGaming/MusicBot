@@ -16,6 +16,9 @@ module.exports = {
     syncInterval: '10m',
 
     // Playlist to play by default
-    defaultDir: 'YingaGaming Radio'
+    defaultDir: 'YingaGaming Radio',
+
+    // Default volume
+    defaultVolume: 0.25
 
 }
