@@ -15,9 +15,10 @@ module.exports = {
     // How often to sync with YouTube
     syncInterval: '10m',
 
-    cache: 0.25,
-
     // Playlist to play by default
-    defaultDir: 'YingaGaming Radio'
+    defaultDir: 'YingaGaming Radio',
+
+    // Default volume
+    defaultVolume: 0.25
 
 }
